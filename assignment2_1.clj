@@ -12,16 +12,13 @@
 ;104
 ;The return value 104 is the first byte in the file "file.txt".
 
-(defmacro safe [vect? & expr]                                              
-  (let [vect (if (and (even? (count vect?)) (vector? vect?))        
-                   vect? [])                                               
-        expr    (if-not (empty? vect) 				; om bindings är tom så kör forms, annars kör (cons bindings? forms)) vilket skapar en sekvens av bindings of forms
-                   expr (cons vect? expr))                     
-        except  `(catch Exception e# e#)]				;
-        (if (instance? java.io.Closeable vect) (.close vect))	 ;check if var can be closed and close it
-    	`(let ~vect (try ~@expr ~except))							 ; försök ~forms, om den ger exception gör ~except
-   )
- )
+(defmacro safe [vect & expr]                                    
+  (let [vect (if (and (even? (count vect)) (vector? vect)) vect [])  ; kollar att vektorn har rätt format                                                     
+        expr    (if-not (empty? vect) expr (cons vect expr))    	; om bindings är tom så kör forms, annars kör (cons bindings? forms)) vilket skapar en sekvens av bindings och forms                 
+        except  `(catch Exception e# e#)]
+    	`(let ~vect (try ~@expr ~except (finally (for [xy# vect] (if (instance? java.io.Closeable xy#) (.close xy#))))))	;försök ~forms, om den ger exception gör ~except, finally stänger FileReader om möjligt
+  )
+)
 
 (import java.io.FileReader java.io.File)
 (safe [s (new FileReader (new File "file.txt"))] (.read s))
