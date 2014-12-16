@@ -11,4 +11,11 @@
 ;(select [columns] from #{table} where :column (op value) orderby :column)
 ;where the condition operator 'op' is one of the following: = < > <>
 
-(defmacro SQL-syntax ([][]))
+(defmacro selectSQL [[columns] from #{table} where [:column op value] orderby :column]                                              
+	
+)
+
+(def persons '({:id 1 :name "olle"} {:id 2 :name "anna"} {:id 3 :name
+"isak"} {:id 4 :name "beatrice"}))
+
+(selectSQL [:id :name] from persons where [:id > 2] orderby :name)
